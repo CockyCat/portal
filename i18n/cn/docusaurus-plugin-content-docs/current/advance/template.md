@@ -60,35 +60,32 @@ $ vim ~/.goctl/${goctl版本号}/api/handler.tpl
 ```
 将模板替换为以下内容
 ```go
-package handler
+package {{.PkgName}}                                                                                                                   
 
 import (
-	"net/http"
-	"greet/response"// ①
-	{% raw %}
-	{{.ImportPackages}}
-	{% endraw %}
+        "net/http"
+        "github.com/zeromicro/go-zero/rest/httpx"
+        "xxxx/common/response"
+        {{.ImportPackages}}
 )
 
-{% raw %}
 func {{.HandlerName}}(ctx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		{{if .HasRequest}}var req types.{{.RequestType}}
-		if err := httpx.Parse(r, &req); err != nil {
-			httpx.Error(w, err)
-			return
-		}{{end}}
+        return func(w http.ResponseWriter, r *http.Request) {
+                {{if .HasRequest}}var req types.{{.RequestType}}
+                if err := httpx.Parse(r, &req); err != nil {
+                        httpx.Error(w, err)
+                                return
+                }{{end}}
 
-		l := logic.New{{.LogicType}}(r.Context(), ctx)
-		{{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}req{{end}})
-		{{if .HasResp}}response.Response(w, resp, err){{else}}response.Response(w, nil, err){{end}}//②
-			
-	}
+                l := logic.New{{.LogicType}}(r.Context(), ctx)
+                {{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}&req{{end}})
+                {{if .HasResp}}response.Response(w, resp, err){{else}}response.Response(w, nil, err){{end}}
+
+        }   
 }
-{% endraw %}
 ```
 
-① 替换为你真实的`response`包名，仅供参考
+① xxxx 替换为你真实的`response`包名，仅供参考
 
 ② 自定义模板内容
 
